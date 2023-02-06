@@ -1,6 +1,9 @@
 import * as vscode from "vscode";
+import { getBlocks, getBlockTrees, getQueryStrings } from "./shuffle/codeBlocks";
 import { getNonce } from "./utilities/getNonce";
 import { getUri } from "./utilities/getUri";
+
+import Parser, { Query } from "tree-sitter";
 
 /**
  * Provider for cat scratch editors.
@@ -47,9 +50,33 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
     function updateWebview() {
+      const text = document.getText();
+      const lang = document.languageId;
+
+      console.log(lang);
+
+      let blockTrees = undefined;
+
+      switch (lang) {
+        case "typescript":
+          const parser = new Parser();
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const TypeScript = require("tree-sitter-typescript").typescript;
+          parser.setLanguage(TypeScript);
+          const tree = parser.parse(text);
+          const queries = getQueryStrings("typescript").map((q) => new Query(TypeScript, q));
+          const blocks = getBlocks(tree, queries);
+          blockTrees = getBlockTrees(tree.walk(), blocks);
+          break;
+
+        default:
+          return;
+      }
+
       webviewPanel.webview.postMessage({
         type: "update",
         text: document.getText(),
+        blockTrees: blockTrees,
       });
     }
 
@@ -85,19 +112,6 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
         // are created within the webview context (i.e. inside media/main.js)
       }
     }, undefined);
-
-    // Receive message from the webview.
-    webviewPanel.webview.onDidReceiveMessage((e) => {
-      switch (e.type) {
-        case "add":
-          this.addNewScratch(document);
-          return;
-
-        case "delete":
-          this.deleteScratch(document, e.id);
-          return;
-      }
-    });
 
     updateWebview();
   }
