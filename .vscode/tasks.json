@@ -7,13 +7,24 @@
 			"type": "npm",
 			"script": "watch",
 			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
+			"isBackground": false,
 			"presentation": {
 				"reveal": "never"
 			},
 			"group": {
 				"kind": "build",
 				"isDefault": true
+			},
+			"dependsOn": [
+				"webview-ui"
+			]
+		},
+		{
+			"type": "npm",
+			"script": "build",
+			"label": "webview-ui",
+			"options": {
+				"cwd": "${workspaceFolder}${pathSeparator}webview-ui"
 			}
 		}
 	]

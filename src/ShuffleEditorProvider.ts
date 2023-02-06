@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { getNonce } from "./utilities/getNonce";
+import { getUri } from "./utilities/getUri";
 
 /**
  * Provider for cat scratch editors.
@@ -14,6 +15,12 @@ import { getNonce } from "./utilities/getNonce";
  * - Synchronizing changes between a text document and a custom editor.
  */
 export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
+  private static readonly viewType = "shuffle.editor";
+
+  private static readonly scratchCharacters = ["😸", "😹", "😺", "😻", "😼", "😽", "😾", "🙀", "😿", "🐱"];
+
+  constructor(private readonly context: vscode.ExtensionContext) {}
+
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     const provider = new ShuffleEditorProvider(context);
     const providerRegistration = vscode.window.registerCustomEditorProvider(
@@ -22,12 +29,6 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
     );
     return providerRegistration;
   }
-
-  private static readonly viewType = "shuffle.editor";
-
-  private static readonly scratchCharacters = ["😸", "😹", "😺", "😻", "😼", "😽", "😾", "🙀", "😿", "🐱"];
-
-  constructor(private readonly context: vscode.ExtensionContext) {}
 
   /**
    * Called when our custom editor is opened.
@@ -71,6 +72,20 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
       changeDocumentSubscription.dispose();
     });
 
+    webviewPanel.webview.onDidReceiveMessage((message: any) => {
+      const command = message.command;
+      const text = message.text;
+
+      switch (command) {
+        case "hello":
+          // Code that should run in response to the hello message command
+          vscode.window.showInformationMessage(text);
+          return;
+        // Add more switch case statements here as more webview message commands
+        // are created within the webview context (i.e. inside media/main.js)
+      }
+    }, undefined);
+
     // Receive message from the webview.
     webviewPanel.webview.onDidReceiveMessage((e) => {
       switch (e.type) {
@@ -91,56 +106,39 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
    * Get the static html used for the editor webviews.
    */
   private getHtmlForWebview(webview: vscode.Webview): string {
-    // Local path to script and css for the webview
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "catScratch.js")
-    );
+    // The CSS file from the Svelte build output
+    const stylesUri = getUri(webview, this.context.extensionUri, [
+      "webview-ui",
+      "public",
+      "build",
+      "bundle.css",
+    ]);
+    // The JS file from the Svelte build output
+    const scriptUri = getUri(webview, this.context.extensionUri, [
+      "webview-ui",
+      "public",
+      "build",
+      "bundle.js",
+    ]);
 
-    const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "reset.css")
-    );
-
-    const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
-    );
-
-    const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "catScratch.css")
-    );
-
-    // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
 
-    return /* html */ `
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-
-				<!--
-				Use a content security policy to only allow loading images from https or from our extension directory,
-				and only allow scripts that have a specific nonce.
-				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-				<link href="${styleResetUri}" rel="stylesheet" />
-				<link href="${styleVSCodeUri}" rel="stylesheet" />
-				<link href="${styleMainUri}" rel="stylesheet" />
-
-				<title>Cat Scratch</title>
-			</head>
-			<body>
-				<div class="notes">
-					<div class="add-button">
-						<button>Scratch!</button>
-					</div>
-				</div>
-				
-				<script nonce="${nonce}" src="${scriptUri}"></script>
-			</body>
-			</html>`;
+    // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
+    return /*html*/ `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <title>Hello World</title>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+          <link rel="stylesheet" type="text/css" href="${stylesUri}">
+          <script defer nonce="${nonce}" src="${scriptUri}"></script>
+        </head>
+        <body>
+        </body>
+      </html>
+    `;
   }
 
   /**
