@@ -1,34 +1,37 @@
-# Cat Coding — A Webview API Sample
+# Hello World (Svelte)
 
-Demonstrates VS Code's [webview API](https://code.visualstudio.com/api/extension-guides/webview). This includes:
+This is an implementation of the default [Hello World](https://github.com/microsoft/vscode-webview-ui-toolkit-samples/tree/main/default/hello-world) sample extension that demonstrates how to set up and use a [Svelte](https://svelte.dev/) + [Webview UI Toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit) webview extension.
 
-- Creating and showing a basic webview.
-- Dynamically updating a webview's content.
-- Loading local content in a webview.
-- Running scripts in a webview.
-- Sending message from an extension to a webview.
-- Sending messages from a webview to an extension.
-- Using a basic content security policy.
-- Webview lifecycle and handling dispose.
-- Saving and restoring state when the panel goes into the background.
-- Serialization and persistence across VS Code reboots.
+![A screenshot of the sample extension.](./assets/hello-world-screenshot.png)
 
-## Demo
+## Documentation
 
-![demo](demo.gif)
+For a deeper dive into how this sample works, read the guides below.
 
-## VS Code API
+- [Extension structure](./docs/extension-structure.md)
+- [Extension commands](./docs/extension-commands.md)
+- [Extension development cycle](./docs/extension-development-cycle.md)
 
-### `vscode` module
+## Run The Sample
 
-- [`window.createWebviewPanel`](https://code.visualstudio.com/api/references/vscode-api#window.createWebviewPanel)
-- [`window.registerWebviewPanelSerializer`](https://code.visualstudio.com/api/references/vscode-api#window.registerWebviewPanelSerializer)
+```bash
+# Copy sample extension locally
+npx degit microsoft/vscode-webview-ui-toolkit-samples/frameworks/hello-world-svelte hello-world
 
-## Running the example
+# Navigate into sample directory
+cd hello-world
 
-- Open this example in VS Code 1.47+
-- `npm install`
-- `npm run watch` or `npm run compile`
-- `F5` to start debugging
+# Install dependencies for both the extension and webview UI source code
+npm run install:all
 
-Run the `Cat Coding: Start cat coding session` to create the webview.
+# Build webview UI source code
+npm run build:webview
+
+# Open sample in VS Code
+code .
+```
+
+Once the sample is open inside VS Code you can run the extension by doing the following:
+
+1. Press `F5` to open a new Extension Development Host window
+2. Inside the host window, open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type `Hello World (Svelte): Show`

@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/node,yarn,svelte
-# Edit at https://www.toptal.com/developers/gitignore?templates=node,yarn,svelte
+# Created by https://www.toptal.com/developers/gitignore/api/yarn,node,svelte
+# Edit at https://www.toptal.com/developers/gitignore?templates=yarn,node,svelte
 
 ### Node ###
 # Logs
@@ -165,4 +165,4 @@ package
 # and uncomment the following lines
 # .pnp.*
 
-# End of https://www.toptal.com/developers/gitignore/api/node,yarn,svelte
+# End of https://www.toptal.com/developers/gitignore/api/yarn,node,svelte

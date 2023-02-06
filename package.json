@@ -1,56 +1,46 @@
 {
-  "name": "cat-coding",
-  "description": "Cat Coding - A Webview API Sample",
+  "name": "hello-world-svelte",
+  "displayName": "hello-world-svelte",
+  "description": "A hello world sample extension to demonstrate using Svelte with the Webview UI Toolkit for VS Code.",
   "version": "0.0.1",
-  "publisher": "vscode-samples",
-  "private": true,
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Microsoft/vscode-extension-samples"
-  },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.46.0"
   },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "onWebviewPanel:catCoding"
+    "onCommand:hello-world.showHelloWorld"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "catCoding.start",
-        "title": "Start cat coding session",
-        "category": "Cat Coding"
-      },
-      {
-        "command": "catCoding.doRefactor",
-        "title": "Do some refactoring",
-        "category": "Cat Coding"
+        "command": "hello-world.showHelloWorld",
+        "title": "Hello World (Svelte): Show"
       }
     ]
   },
   "scripts": {
+    "install:all": "yarn install && cd webview-ui && yarn install",
+    "start:webview": "cd webview-ui && yarn run dev",
+    "build:webview": "cd webview-ui && yarn run build",
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
-    "lint": "eslint \"src/**/*.ts\"",
-    "watch": "tsc -w -p ./"
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/glob": "^8.0.1",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^16.11.7",
-    "@types/vscode": "^1.73.0",
-    "@types/vscode-webview": "^1.57.0",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.0",
-    "@vscode/test-electron": "^2.2.3",
-    "eslint": "^8.26.0",
-    "glob": "^8.1.0",
-    "mocha": "^10.2.0",
-    "typescript": "^4.9.4"
+    "@types/glob": "^7.1.3",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.46.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.5.0"
   }
 }

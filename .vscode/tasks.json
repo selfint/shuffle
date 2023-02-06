@@ -14,17 +14,6 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			},
-			"dependsOn": [
-				"webview"
-			]
-		},
-		{
-			"type": "npm",
-			"script": "build",
-			"label": "webview",
-			"options": {
-				"cwd": "${workspaceFolder}${pathSeparator}webview"
 			}
 		}
 	]
