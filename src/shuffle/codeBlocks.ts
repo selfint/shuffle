@@ -1,76 +1,49 @@
-import { SyntaxNode, Tree, Query, TreeCursor } from "tree-sitter";
+import axios from "axios";
 
-export type Block = {
-  nodes: SyntaxNode[];
+declare type BlockLocation = {
+  start_byte: number;
+  end_byte: number;
+  start_row: number;
+  start_col: number;
+  end_row: number;
+  end_col: number;
 };
 
-export type BlockTree = {
-  block: Block;
-  children: BlockTree[];
+declare type BlockLocationTree = {
+  block: BlockLocation;
+  children: BlockLocationTree[];
 };
 
-export function getBlocks(tree: Tree, queries: Query[]): Block[] {
-  const blocks: Block[] = [];
+declare type GetSubtreesArgs = {
+  items: string[];
+  content: string;
+  language: SupportedLanguage;
+};
 
-  for (const query of queries) {
-    const captures = query.captures(tree.rootNode);
+declare type GetSubtreesResponse = BlockLocationTree[];
 
-    const nodes = [];
-    for (const capture of captures) {
-      nodes.push(capture.node);
-    }
+declare type MoveItemArgs = {
+  item_types: string[];
+  src_item: BlockLocation;
+  dst_item: BlockLocation;
+  content: string;
+  language: SupportedLanguage;
+};
 
-    blocks.push({ nodes: nodes });
-  }
+declare type MoveItemResponse = {
+  Ok: string | undefined;
+  Err: string | undefined;
+};
 
-  return blocks;
-}
+const GET_SUBTREES_ENDPOINT = "http://localhost:8000/get_subtrees";
+export async function getBlockTrees(args: GetSubtreesArgs): Promise<BlockLocationTree[]> {
+  const response = await axios({
+    url: GET_SUBTREES_ENDPOINT,
+    method: "POST",
+    data: args,
+  });
 
-function getBlockTail(block: Block): SyntaxNode | undefined {
-  if (block.nodes.length === 0) {
-    return undefined;
-  } else {
-    return block.nodes[block.nodes.length - 1];
-  }
-}
-
-export function getBlockTrees(cursor: TreeCursor, blocks: Block[]): BlockTree[] {
-  const node = cursor.currentNode;
-
-  const trees: BlockTree[] = [];
-
-  if (cursor.gotoFirstChild()) {
-    const children = getBlockTrees(cursor, blocks);
-
-    let nodeIsBlock = false;
-
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
-      const blockTail = getBlockTail(block);
-      if (blockTail === undefined) {
-        continue;
-      }
-
-      if (blockTail! === node) {
-        blocks.splice(i, 1);
-        trees.push({ block: block, children: children });
-        nodeIsBlock = true;
-        break;
-      }
-    }
-
-    if (!nodeIsBlock) {
-      trees.push(...children);
-    }
-
-    cursor.gotoParent();
-  }
-
-  if (cursor.gotoNextSibling()) {
-    trees.push(...getBlockTrees(cursor, blocks));
-  }
-
-  return trees;
+  return response.data;
 }
 
 export type SupportedLanguage = "rust" | "typescript" | "tsx";

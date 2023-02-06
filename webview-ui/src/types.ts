@@ -1,12 +1,15 @@
 /// <reference types="svelte" />
 
-import type { SyntaxNode } from "tree-sitter";
-
-export type Block = {
-  nodes: SyntaxNode[];
+export type BlockLocation = {
+  start_byte: number;
+  end_byte: number;
+  start_row: number;
+  start_col: number;
+  end_row: number;
+  end_col: number;
 };
 
-export type BlockTree = {
-  block: Block;
-  children: BlockTree[];
+export type BlockLocationTree = {
+  block: BlockLocation;
+  children: BlockLocationTree[];
 };

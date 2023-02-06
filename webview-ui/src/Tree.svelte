@@ -1,49 +1,51 @@
 <script lang="ts">
-  import { children } from "svelte/internal";
-  import type { Block, BlockTree } from "./types";
+  import type { BlockLocation, BlockLocationTree } from "./types";
 
   export let text: string;
-  export let tree: BlockTree;
-  export let onClickHandler: (block: Block) => void;
-  export let selected: Block;
+  export let tree: BlockLocationTree;
+  export let onClickHandler: (block: BlockLocation) => void;
+  export let selected: BlockLocation;
+
+  console.log(tree);
 </script>
 
 <main>
   {#if tree.children.length !== 0}
-    <div>
-      {text.substring(tree.block.nodes[0].startIndex, tree.children[0].block.nodes[0].startIndex)}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div
+      class="block"
+      on:click={(event) => {
+        event.preventDefault();
+        onClickHandler(tree.block);
+      }}
+    >
+      <div>
+        {text.substring(tree.block.start_byte, tree.children[0].block.start_byte)}
+      </div>
+      {#each tree.children as childTree, i}
+        <svelte:self {text} tree={childTree} {onClickHandler} {selected} />
+        {#if i !== tree.children.length - 1}
+          <div>
+            {text.substring(tree.children[i].block.end_byte, tree.children[i + 1].block.start_byte)}
+          </div>
+        {/if}
+      {/each}
+      <div>
+        {text.substring(tree.children[tree.children.length - 1].block.end_byte, tree.block.end_byte)}
+      </div>
     </div>
-    {#each tree.children as childTree, i}
-      <svelte:self {text} tree={childTree} {onClickHandler} {selected} />
-      {#if i !== tree.children.length - 1}
-        <div>
-          {text.substring(
-            tree.children[i].block.nodes[tree.children[i].block.nodes.length - 1].endIndex,
-            tree.children[i + 1].block.nodes[0].startIndex
-          )}
-        </div>
-      {/if}
-    {/each}
-    <div>
-      {text.substring(
-        tree.children[tree.children.length - 1].block.nodes[
-          tree.children[tree.children.length - 1].block.nodes.length - 1
-        ].endIndex,
-        tree.block.nodes[tree.block.nodes.length - 1].endIndex
-      )}
+  {:else}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div
+      class="block"
+      on:click={(event) => {
+        event.preventDefault();
+        onClickHandler(tree.block);
+      }}
+    >
+      {text.substring(tree.block.start_byte, tree.block.end_byte)}
     </div>
   {/if}
-
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div
-    class="block"
-    on:click={(event) => {
-      event.preventDefault();
-      onClickHandler(tree.block);
-    }}
-  >
-    {text.substring(tree.block.nodes[0].startIndex, tree.block.nodes[tree.block.nodes.length - 1].endIndex)}
-  </div>
 </main>
 
 <style>

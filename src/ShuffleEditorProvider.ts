@@ -1,9 +1,7 @@
 import * as vscode from "vscode";
-import { getBlocks, getBlockTrees, getQueryStrings } from "./shuffle/codeBlocks";
+import { getBlockTrees, getQueryStrings } from "./shuffle/codeBlocks";
 import { getNonce } from "./utilities/getNonce";
 import { getUri } from "./utilities/getUri";
-
-import Parser, { Query } from "tree-sitter";
 
 /**
  * Provider for cat scratch editors.
@@ -49,24 +47,23 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-    function updateWebview() {
+    async function updateWebview() {
       const text = document.getText();
       const lang = document.languageId;
 
-      console.log(lang);
+      console.log(`lang is: ${lang}`);
 
       let blockTrees = undefined;
 
       switch (lang) {
         case "typescript":
-          const parser = new Parser();
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          const TypeScript = require("tree-sitter-typescript").typescript;
-          parser.setLanguage(TypeScript);
-          const tree = parser.parse(text);
-          const queries = getQueryStrings("typescript").map((q) => new Query(TypeScript, q));
-          const blocks = getBlocks(tree, queries);
-          blockTrees = getBlockTrees(tree.walk(), blocks);
+          blockTrees = await getBlockTrees({
+            content: text,
+            items: getQueryStrings("typescript"),
+            language: "typescript",
+          });
+
           break;
 
         default:
@@ -88,9 +85,9 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
     // Remember that a single text document can also be shared between multiple custom
     // editors (this happens for example when you split a custom editor)
 
-    const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
+    const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(async (e) => {
       if (e.document.uri.toString() === document.uri.toString()) {
-        updateWebview();
+        await updateWebview();
       }
     });
 
@@ -113,7 +110,7 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
       }
     }, undefined);
 
-    updateWebview();
+    await updateWebview();
   }
 
   /**

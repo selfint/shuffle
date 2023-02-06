@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.2.1",
-    "sirv-cli": "^2.0.0",
-    "tree-sitter": "^0.20.1"
+    "sirv-cli": "^2.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

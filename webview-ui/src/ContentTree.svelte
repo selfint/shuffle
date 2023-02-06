@@ -1,18 +1,23 @@
 <script lang="ts">
   import Tree from "./Tree.svelte";
-  import type { Block, BlockTree } from "./types";
+  import type { BlockLocation, BlockLocationTree } from "./types";
 
   export let text: string;
-  export let blockTrees: BlockTree[];
-  export let onClickHandler: (block: Block) => void;
-  export let selected: Block;
+  export let blockTrees: BlockLocationTree[];
+  export let onClickHandler: (block: BlockLocation) => void;
+  export let selected: BlockLocation;
 </script>
 
 <main>
+  <h1>Welcome to shuffle</h1>
   {#if blockTrees.length !== 0}
-    {#each blockTrees as tree}
-      <Tree {text} {tree} {onClickHandler} {selected} />
-    {/each}
+    <div class="block">
+      {text.substring(0, blockTrees[0].block.start_byte)}
+      {#each blockTrees as tree}
+        <Tree {text} {tree} {onClickHandler} {selected} />
+      {/each}
+      {text.substring(blockTrees[blockTrees.length - 1].block.start_byte, text.length)}
+    </div>
   {/if}
 </main>
 
