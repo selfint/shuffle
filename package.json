@@ -23,12 +23,29 @@
             "filenamePattern": "*.cscratch"
           }
         ]
+      },
+      {
+        "viewType": "shuffle.editor",
+        "displayName": "Shuffle",
+        "selector": [
+          {
+            "filenamePattern": "*.ts"
+          },
+          {
+            "filenamePattern": "*.svelte"
+          }
+        ],
+        "priority": "option"
       }
     ],
     "commands": [
       {
         "command": "hello-world.showHelloWorld",
         "title": "Hello World (Svelte): Show"
+      },
+      {
+        "command": "shuffle.open",
+        "title": "Open Shuffle editor"
       }
     ]
   },

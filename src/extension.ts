@@ -1,6 +1,7 @@
 import { commands, ExtensionContext } from "vscode";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
-import { CatScratchEditorProvider } from "./ShuffleEditor";
+import { CatScratchEditorProvider } from "./CatScratchEditorProvider";
+import { ShuffleEditorProvider } from "./ShuffleEditorProvider";
 
 export function activate(context: ExtensionContext) {
   // Create the show hello world command
@@ -12,4 +13,5 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(showHelloWorldCommand);
 
   context.subscriptions.push(CatScratchEditorProvider.register(context));
+  context.subscriptions.push(ShuffleEditorProvider.register(context));
 }
