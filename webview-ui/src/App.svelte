@@ -36,8 +36,18 @@
   );
 
   function setSelected(block: BlockLocation): void {
-    selected = block;
-    console.log(`Ran handler: block=${block.start_byte} selected=${selected.start_byte}`);
+    if (selected === undefined) {
+      selected = block;
+    } else {
+      vscode.postMessage({
+        command: "move",
+        args: {
+          src: selected,
+          dst: block,
+        },
+      });
+      selected = undefined;
+    }
   }
 </script>
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-declare type BlockLocation = {
+export type BlockLocation = {
   start_byte: number;
   end_byte: number;
   start_row: number;
@@ -9,20 +9,20 @@ declare type BlockLocation = {
   end_col: number;
 };
 
-declare type BlockLocationTree = {
+export type BlockLocationTree = {
   block: BlockLocation;
   children: BlockLocationTree[];
 };
 
-declare type GetSubtreesArgs = {
+export type GetSubtreesArgs = {
   items: string[];
   content: string;
   language: SupportedLanguage;
 };
 
-declare type GetSubtreesResponse = BlockLocationTree[];
+export type GetSubtreesResponse = BlockLocationTree[];
 
-declare type MoveItemArgs = {
+export type MoveItemArgs = {
   item_types: string[];
   src_item: BlockLocation;
   dst_item: BlockLocation;
@@ -30,7 +30,7 @@ declare type MoveItemArgs = {
   language: SupportedLanguage;
 };
 
-declare type MoveItemResponse = {
+export type MoveItemResponse = {
   Ok: string | undefined;
   Err: string | undefined;
 };
@@ -51,7 +51,7 @@ export async function getBlockTrees(args: GetSubtreesArgs): Promise<BlockLocatio
 }
 
 const MOVE_ITEM_ENDPOINT = "http://localhost:8000/move_item";
-export async function moveBlock(args: GetSubtreesArgs): Promise<BlockLocationTree[]> {
+export async function moveBlock(args: MoveItemArgs): Promise<MoveItemResponse> {
   if (args.language === "typescriptreact") {
     args.language = "tsx";
   }

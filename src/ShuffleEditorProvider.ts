@@ -1,5 +1,12 @@
 import * as vscode from "vscode";
-import { getBlockTrees, getQueryStrings, SUPPORTED_LANGUAGES } from "./shuffle/codeBlocks";
+import {
+  BlockLocation,
+  getBlockTrees,
+  getQueryStrings,
+  moveBlock,
+  MoveItemArgs,
+  SUPPORTED_LANGUAGES,
+} from "./shuffle/codeBlocks";
 import { getNonce } from "./utilities/getNonce";
 import { getUri } from "./utilities/getUri";
 
@@ -47,9 +54,19 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
+    function getDocLang() {
+      let lang = document.languageId;
+
+      if (lang === "typescriptreact") {
+        lang = "tsx";
+      }
+
+      return lang;
+    }
+
     async function updateWebview() {
       const text = document.getText();
-      const lang = document.languageId;
+      const lang = getDocLang();
 
       // @ts-expect-error
       if (SUPPORTED_LANGUAGES.includes(lang)) {
@@ -59,7 +76,7 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
           // @ts-expect-error
           items: getQueryStrings(lang),
           // @ts-expect-error
-          language: lang,
+          language: getDocLang(),
         });
 
         webviewPanel.webview.postMessage({
@@ -68,7 +85,7 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
           blockTrees: blockTrees,
         });
       } else {
-        vscode.window.showErrorMessage(`Can't shuffle code in unsupported language: ${lang}`);
+        vscode.window.showErrorMessage(`Can't shuffle code in unsupported language: ${document.languageId}`);
         return;
       }
     }
@@ -92,12 +109,55 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
       changeDocumentSubscription.dispose();
     });
 
-    webviewPanel.webview.onDidReceiveMessage((message: { command: string; args: any }) => {
+    vscode.workspace.onDidChangeTextDocument(async (event) => {
+      const newContent = event.document.getText();
+
+      const blockTrees = await getBlockTrees({
+        content: newContent,
+        // @ts-expect-error
+        items: getQueryStrings(getDocLang()),
+        // @ts-expect-error
+        language: getDocLang(),
+      });
+
+      webviewPanel.webview.postMessage({
+        type: "update",
+        text: newContent,
+        blockTrees: blockTrees,
+      });
+    });
+
+    webviewPanel.webview.onDidReceiveMessage(async (message: { command: string; args: any }) => {
       const command = message.command;
       const args = message.args;
 
       switch (command) {
         case "move":
+          const src: BlockLocation = args.src;
+          const dst: BlockLocation = args.dst;
+          const moveArgs: MoveItemArgs = {
+            content: document.getText(),
+            src_item: src,
+            dst_item: dst,
+            //@ts-expect-error
+            item_types: getQueryStrings(document.languageId),
+            //@ts-expect-error
+            language: getDocLang(),
+          };
+
+          const response = await moveBlock(moveArgs);
+
+          if (response.Err !== undefined) {
+            vscode.window.showErrorMessage(`Failed to move block: ${response.Err}`);
+          } else if (response.Ok !== undefined) {
+            const newContent = response.Ok;
+
+            const edit = new vscode.WorkspaceEdit();
+
+            edit.replace(document.uri, new vscode.Range(0, 0, document.lineCount, 0), newContent);
+
+            await vscode.workspace.applyEdit(edit);
+          }
           break;
       }
     }, undefined);
