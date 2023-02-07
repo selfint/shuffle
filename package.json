@@ -32,7 +32,10 @@
             "filenamePattern": "*.ts"
           },
           {
-            "filenamePattern": "*.svelte"
+            "filenamePattern": "*.tsx"
+          },
+          {
+            "filenamePattern": "*.rs"
           }
         ],
         "priority": "option"

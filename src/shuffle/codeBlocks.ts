@@ -37,6 +37,10 @@ declare type MoveItemResponse = {
 
 const GET_SUBTREES_ENDPOINT = "http://localhost:8000/get_subtrees";
 export async function getBlockTrees(args: GetSubtreesArgs): Promise<BlockLocationTree[]> {
+  if (args.language === "typescriptreact") {
+    args.language = "tsx";
+  }
+
   const response = await axios({
     url: GET_SUBTREES_ENDPOINT,
     method: "POST",
@@ -46,7 +50,23 @@ export async function getBlockTrees(args: GetSubtreesArgs): Promise<BlockLocatio
   return response.data;
 }
 
-export type SupportedLanguage = "rust" | "typescript" | "tsx";
+const MOVE_ITEM_ENDPOINT = "http://localhost:8000/move_item";
+export async function moveBlock(args: GetSubtreesArgs): Promise<BlockLocationTree[]> {
+  if (args.language === "typescriptreact") {
+    args.language = "tsx";
+  }
+
+  const response = await axios({
+    url: MOVE_ITEM_ENDPOINT,
+    method: "POST",
+    data: args,
+  });
+
+  return response.data;
+}
+
+export const SUPPORTED_LANGUAGES = ["rust", "typescript", "tsx", "typescriptreact"] as const;
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 export function getQueryStrings(lang: SupportedLanguage): string[] {
   switch (lang) {
     case "rust":
@@ -139,5 +159,7 @@ export function getQueryStrings(lang: SupportedLanguage): string[] {
       const typescriptQueries = getQueryStrings("typescript");
       const tsxQueries = [`(jsx_element) @item`, "(jsx_self_closing_element) @item"];
       return [...typescriptQueries, ...tsxQueries];
+    case "typescriptreact":
+      return getQueryStrings("tsx");
   }
 }

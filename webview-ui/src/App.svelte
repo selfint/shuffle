@@ -1,7 +1,7 @@
 <script lang="ts">
   import { provideVSCodeDesignSystem, vsCodeButton } from "@vscode/webview-ui-toolkit";
   import ContentTree from "./ContentTree.svelte";
-  import type { BlockLocationTree } from "./types";
+  import type { BlockLocation, BlockLocationTree } from "./types";
   import { vscode } from "./utilities/vscode";
 
   // In order to use the Webview UI Toolkit web components they
@@ -25,6 +25,7 @@
 
   let text = "placeholder";
   let blockTrees = [];
+  let selected: BlockLocation | undefined = undefined;
 
   window.addEventListener(
     "message",
@@ -34,19 +35,14 @@
     }
   );
 
-  function handleHowdyClick() {
-    vscode.postMessage({
-      command: "hello",
-      text: "Hey there partner! 🤠",
-    });
+  function setSelected(block: BlockLocation): void {
+    selected = block;
+    console.log(`Ran handler: block=${block.start_byte} selected=${selected.start_byte}`);
   }
 </script>
 
 <main>
-  <h1>Welcome</h1>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <vscode-button on:click={handleHowdyClick}>Howdy 2!</vscode-button>
-  <ContentTree {blockTrees} {text} selected={null} onClickHandler={(s) => {}} />
+  <ContentTree {blockTrees} {text} {selected} onClickHandler={setSelected} />
 </main>
 
 <style>
@@ -56,9 +52,5 @@
     justify-content: center;
     align-items: flex-start;
     height: 100%;
-  }
-
-  main > * {
-    margin: 1rem 0;
   }
 </style>

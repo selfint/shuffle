@@ -4,21 +4,25 @@
   export let text: string;
   export let tree: BlockLocationTree;
   export let onClickHandler: (block: BlockLocation) => void;
-  export let selected: BlockLocation;
+  export let selected: BlockLocation | undefined;
 
-  console.log(tree);
+  $: borderColor = tree.block === selected ? "cadetblue" : "white";
 </script>
 
 <main>
-  {#if tree.children.length !== 0}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div
-      class="block"
-      on:click={(event) => {
-        event.preventDefault();
-        onClickHandler(tree.block);
-      }}
-    >
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div
+    class="block"
+    style="border-color: {borderColor}"
+    on:click|self={(event) => {
+      event.preventDefault();
+      onClickHandler(tree.block);
+      console.log(
+        `After handler: borderColor=${borderColor} block=${tree.block.start_byte} selected=${selected.start_byte}`
+      );
+    }}
+  >
+    {#if tree.children.length !== 0}
       <div>
         {text.substring(tree.block.start_byte, tree.children[0].block.start_byte)}
       </div>
@@ -33,23 +37,15 @@
       <div>
         {text.substring(tree.children[tree.children.length - 1].block.end_byte, tree.block.end_byte)}
       </div>
-    </div>
-  {:else}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div
-      class="block"
-      on:click={(event) => {
-        event.preventDefault();
-        onClickHandler(tree.block);
-      }}
-    >
+    {:else}
       {text.substring(tree.block.start_byte, tree.block.end_byte)}
-    </div>
-  {/if}
+    {/if}
+  </div>
 </main>
 
 <style>
   .block {
+    border-color: white;
     border-width: 1px;
     border-style: solid;
     margin-left: 10px;

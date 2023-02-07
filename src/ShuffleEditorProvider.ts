@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getBlockTrees, getQueryStrings } from "./shuffle/codeBlocks";
+import { getBlockTrees, getQueryStrings, SUPPORTED_LANGUAGES } from "./shuffle/codeBlocks";
 import { getNonce } from "./utilities/getNonce";
 import { getUri } from "./utilities/getUri";
 
@@ -51,30 +51,26 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
       const text = document.getText();
       const lang = document.languageId;
 
-      console.log(`lang is: ${lang}`);
+      // @ts-expect-error
+      if (SUPPORTED_LANGUAGES.includes(lang)) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const blockTrees = await getBlockTrees({
+          content: text,
+          // @ts-expect-error
+          items: getQueryStrings(lang),
+          // @ts-expect-error
+          language: lang,
+        });
 
-      let blockTrees = undefined;
-
-      switch (lang) {
-        case "typescript":
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          blockTrees = await getBlockTrees({
-            content: text,
-            items: getQueryStrings("typescript"),
-            language: "typescript",
-          });
-
-          break;
-
-        default:
-          return;
+        webviewPanel.webview.postMessage({
+          type: "update",
+          text: document.getText(),
+          blockTrees: blockTrees,
+        });
+      } else {
+        vscode.window.showErrorMessage(`Can't shuffle code in unsupported language: ${lang}`);
+        return;
       }
-
-      webviewPanel.webview.postMessage({
-        type: "update",
-        text: document.getText(),
-        blockTrees: blockTrees,
-      });
     }
 
     // Hook up event handlers so that we can synchronize the webview with the text document.
@@ -96,17 +92,13 @@ export class ShuffleEditorProvider implements vscode.CustomTextEditorProvider {
       changeDocumentSubscription.dispose();
     });
 
-    webviewPanel.webview.onDidReceiveMessage((message: any) => {
+    webviewPanel.webview.onDidReceiveMessage((message: { command: string; args: any }) => {
       const command = message.command;
-      const text = message.text;
+      const args = message.args;
 
       switch (command) {
-        case "hello":
-          // Code that should run in response to the hello message command
-          vscode.window.showInformationMessage(text);
-          return;
-        // Add more switch case statements here as more webview message commands
-        // are created within the webview context (i.e. inside media/main.js)
+        case "move":
+          break;
       }
     }, undefined);
 
