@@ -1,34 +1,15 @@
-# Cat Coding — A Webview API Sample
+# Shuffle
 
-Demonstrates VS Code's [webview API](https://code.visualstudio.com/api/extension-guides/webview). This includes:
+Shuffle your code around!
 
-- Creating and showing a basic webview.
-- Dynamically updating a webview's content.
-- Loading local content in a webview.
-- Running scripts in a webview.
-- Sending message from an extension to a webview.
-- Sending messages from a webview to an extension.
-- Using a basic content security policy.
-- Webview lifecycle and handling dispose.
-- Saving and restoring state when the panel goes into the background.
-- Serialization and persistence across VS Code reboots.
+This extension allows you to move your code blocks around, **_in any language_**.
 
-## Demo
+## Examples
 
-![demo](demo.gif)
+### TypeScript + JSX
 
-## VS Code API
+![example](./assets/Shuffle-demo-2.gif)
 
-### `vscode` module
+### Rust
 
-- [`window.createWebviewPanel`](https://code.visualstudio.com/api/references/vscode-api#window.createWebviewPanel)
-- [`window.registerWebviewPanelSerializer`](https://code.visualstudio.com/api/references/vscode-api#window.registerWebviewPanelSerializer)
-
-## Running the example
-
-- Open this example in VS Code 1.47+
-- `npm install`
-- `npm run watch` or `npm run compile`
-- `F5` to start debugging
-
-Run the `Cat Coding: Start cat coding session` to create the webview.
+![example](./assets/Shuffle-demo-4.gif)
